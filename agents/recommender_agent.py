@@ -170,14 +170,18 @@ CRITICAL: You MUST include the real URL for every product using exactly this for
         api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
         headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"} if os.getenv("HF_TOKEN") else {}
         try:
-            response = requests.post(api_url, headers=headers, json={"inputs": [query]}, timeout=10)
+            print("Sending request to HF API...")
+            response = requests.post(api_url, headers=headers, json={"inputs": [query]}, timeout=30)
             if response.status_code == 200:
+                print("HF API Success!")
                 result = response.json()
                 query_vector = result[0] if isinstance(result[0], list) else result
             else:
+                print(f"HF API Failed with status {response.status_code}: {response.text}")
                 # Mock vector if API fails (384 dimensions for MiniLM)
                 query_vector = [0.0] * 384
-        except Exception:
+        except Exception as e:
+            print(f"HF API Exception: {e}")
             query_vector = [0.0] * 384
         
         # Step 3 — query Pinecone:
