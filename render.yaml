@@ -13,8 +13,7 @@ services:
         sync: false
       - key: PINECONE_API_KEY
         sync: false
-      - key: PINECONE_ENV
-        sync: false
+
       - key: LANGFUSE_PUBLIC_KEY
         sync: false
       - key: LANGFUSE_SECRET_KEY
