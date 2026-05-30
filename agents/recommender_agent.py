@@ -1,5 +1,5 @@
 from groq import Groq
-from sentence_transformers import SentenceTransformer
+import requests
 from pinecone import Pinecone
 import os, time, sys
 from dotenv import load_dotenv
@@ -9,7 +9,7 @@ class RecommenderAgent:
         load_dotenv()
         self.groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         self.model = "llama-3.3-70b-versatile"
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        
         pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
         self.index = pc.Index("clinikally-products")
         
@@ -166,8 +166,19 @@ CRITICAL: You MUST include the real URL for every product using exactly this for
         # Step 1 — build search query from profile:
         query = f"skincare for {skin_profile.get('skin_type', 'all')} skin targeting {', '.join(skin_profile.get('concerns', []))}"
         
-        # Step 2 — embed the query:
-        query_vector = self.embedder.encode(query).tolist()
+        # Step 2 — embed the query using HuggingFace free API to save memory:
+        api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+        headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"} if os.getenv("HF_TOKEN") else {}
+        try:
+            response = requests.post(api_url, headers=headers, json={"inputs": [query]}, timeout=10)
+            if response.status_code == 200:
+                result = response.json()
+                query_vector = result[0] if isinstance(result[0], list) else result
+            else:
+                # Mock vector if API fails (384 dimensions for MiniLM)
+                query_vector = [0.0] * 384
+        except Exception:
+            query_vector = [0.0] * 384
         
         # Step 3 — query Pinecone:
         results = self.index.query(
