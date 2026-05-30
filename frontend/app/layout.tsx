@@ -4,6 +4,7 @@ import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
+// DermiQue - AI Skincare Assistant
 export const metadata: Metadata = {
   title: "Dermique — AI Skin Assistant",
   description: "AI powered skincare recommendations"
