@@ -203,6 +203,9 @@ CRITICAL: You MUST include the real URL for every product using exactly this for
                 "product_url": m.get("url", "")
             })
         
+        if not retrieved.strip():
+            retrieved = "NO PRODUCTS FOUND IN DATABASE. Please tell the user you cannot find any matching products right now."
+        
         # Step 5 — call Groq:
         user_message = f"""User skin profile:
 - Skin type: {skin_profile.get('skin_type')}
@@ -213,7 +216,7 @@ CRITICAL: You MUST include the real URL for every product using exactly this for
 Retrieved products from catalog:
 {retrieved}
 
-Write personalized recommendations for this user."""
+Write personalized recommendations for this user. If NO PRODUCTS FOUND, apologize and do not recommend anything."""
 
         response = self.groq_client.chat.completions.create(
             model=self.model,
