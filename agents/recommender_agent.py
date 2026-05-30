@@ -1,7 +1,9 @@
 import os
-import json
 import time
+import sys
+import requests
 from groq import Groq
+from pinecone import Pinecone
 from dotenv import load_dotenv
 
 class RecommenderAgent:
@@ -10,30 +12,8 @@ class RecommenderAgent:
         self.groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         self.model = "llama-3.3-70b-versatile"
         
-        # Load products from local JSON file instead of Pinecone to guarantee it works 100% of the time!
-        try:
-            # When running on Render, the root is backend/
-            products_path = os.path.join(os.path.dirname(__file__), "..", "products.json")
-            if not os.path.exists(products_path):
-                # Fallback for local testing
-                products_path = os.path.join(os.path.dirname(__file__), "..", "..", "products.json")
-                
-            with open(products_path, "r", encoding="utf-8") as f:
-                self.products = json.load(f)
-        except Exception as e:
-            print("Failed to load products.json:", e)
-            self.products = []
-            
-        # Format products catalog into a string once on startup
-        self.catalog_string = ""
-        for i, p in enumerate(self.products):
-            self.catalog_string += f"Product #{i+1}:\n"
-            self.catalog_string += f"- Name: {p.get('name', 'Unknown')}\n"
-            self.catalog_string += f"- URL: {p.get('url', 'Unknown')}\n"
-            self.catalog_string += f"- Type: {p.get('skin_type', 'Unknown')}\n"
-            self.catalog_string += f"- Concerns: {', '.join(p.get('concerns', []))}\n"
-            self.catalog_string += f"- Key Ingredients: {', '.join(p.get('key_ingredients', []))}\n"
-            self.catalog_string += f"- Description: {p.get('description', '')}\n\n"
+        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        self.index = pc.Index("clinikally-products")
         
         self.system_prompt = """You are Dermique — a board-certified dermatology AI assistant.
 
@@ -89,8 +69,61 @@ CRITICAL: You MUST ONLY recommend products that are in the provided catalog belo
 
     def recommend(self, skin_profile: dict) -> dict:
         start_time = time.time()
-        if not self.products:
-            return {"response": "Product catalog is empty. Could not load products.json", "products": []}
+        
+        # Step 1 — build search query from profile:
+        query = f"skincare for {skin_profile.get('skin_type', 'all')} skin targeting {', '.join(skin_profile.get('concerns', []))}"
+        
+        # Step 2 — embed the query using HuggingFace free API:
+        api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+        headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"} if os.getenv("HF_TOKEN") else {}
+        
+        query_vector = [0.0] * 384
+        for attempt in range(5):  # Try up to 5 times (wait for cold start)
+            try:
+                print(f"HF API Attempt {attempt + 1}...")
+                response = requests.post(api_url, headers=headers, json={"inputs": [query]}, timeout=30)
+                if response.status_code == 200:
+                    print("HF API Success!")
+                    result = response.json()
+                    query_vector = result[0] if isinstance(result[0], list) else result
+                    break
+                elif response.status_code == 503:
+                    # Model is loading
+                    estimated_time = response.json().get("estimated_time", 10)
+                    print(f"Model is loading, waiting {estimated_time} seconds...")
+                    time.sleep(estimated_time)
+                else:
+                    print(f"HF API Failed with status {response.status_code}: {response.text}")
+                    break
+            except Exception as e:
+                print(f"HF API Exception: {e}")
+                break
+        
+        # Step 3 — query Pinecone:
+        results = self.index.query(
+            vector=query_vector,
+            top_k=3,
+            include_metadata=True
+        )
+        
+        # Step 4 — format retrieved products as string:
+        retrieved = ""
+        product_list = []
+        for match in results.matches:
+            m = match.metadata
+            retrieved += f"Name: {m.get('name', 'Unknown')}\n"
+            retrieved += f"URL: {m.get('url', '')}\n"
+            retrieved += f"Concerns: {m.get('concerns', [])}\n"
+            retrieved += f"Description: {m.get('description', '')}\n\n"
+            product_list.append({
+                "name": m.get("name", "Unknown"),
+                "category": m.get("category", "Skincare"),
+                "rating": m.get("rating", "4.5"),
+                "product_url": m.get("url", "")
+            })
+        
+        if not retrieved.strip():
+            retrieved = "NO PRODUCTS FOUND IN DATABASE. Please tell the user you cannot find any matching products right now."
             
         user_message = f"""User skin profile:
 - Skin type: {skin_profile.get('skin_type')}
@@ -99,7 +132,7 @@ CRITICAL: You MUST ONLY recommend products that are in the provided catalog belo
 - Sensitivities: {', '.join(skin_profile.get('sensitivities', ['none']))}
 
 --- FULL PRODUCT CATALOG ---
-{self.catalog_string}
+{retrieved}
 ----------------------------
 
 Based on the user's profile and the catalog above, pick the 3 absolute best products and write personalized recommendations."""
@@ -120,13 +153,6 @@ Based on the user's profile and the catalog above, pick the 3 absolute best prod
             response_text = response.choices[0].message.content
             tokens = response.usage.total_tokens
             latency_ms = (time.time() - start_time) * 1000
-            
-            # Create a mock product list since we aren't using pinecone metadata anymore
-            product_list = [
-                {"name": "Clinikally Product 1", "category": "Skincare", "rating": "4.8", "product_url": "#"},
-                {"name": "Clinikally Product 2", "category": "Skincare", "rating": "4.8", "product_url": "#"},
-                {"name": "Clinikally Product 3", "category": "Skincare", "rating": "4.8", "product_url": "#"}
-            ]
             
             return {
                 "response": response_text,
