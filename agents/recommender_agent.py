@@ -9,7 +9,6 @@ class RecommenderAgent:
         load_dotenv()
         self.groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         self.model = "llama-3.3-70b-versatile"
-        os.environ["HF_HUB_OFFLINE"] = "1"
         self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
         pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
         self.index = pc.Index("clinikally-products")
