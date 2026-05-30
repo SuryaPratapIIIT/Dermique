@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 groq
-pinecone-client
+pinecone
 sentence-transformers
 python-dotenv
 pydantic
