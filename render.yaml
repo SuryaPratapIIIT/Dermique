@@ -9,13 +9,21 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      # Make sure to add these in the Render Dashboard or here
       - key: GROQ_API_KEY
         sync: false
       - key: PINECONE_API_KEY
         sync: false
       - key: PINECONE_ENV
         sync: false
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+      - key: LANGFUSE_HOST
+        value: https://hipaa.cloud.langfuse.com
+      - key: HF_TOKEN
+        sync: false
+
 
   - type: web
     name: clara-lite-frontend
