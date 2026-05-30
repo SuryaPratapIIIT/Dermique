@@ -133,7 +133,27 @@ CRITICAL: You MUST ONLY recommend products that are in the provided catalog belo
                     with open(products_path, "r", encoding="utf-8") as f:
                         local_products = json.load(f)
                     
-                    for p in local_products[:3]:
+                    # Dynamic Fallback Scoring (since HF API is down)
+                    scored_products = []
+                    u_concerns = [c.lower() for c in skin_profile.get('concerns', [])]
+                    u_skin = skin_profile.get('skin_type', '').lower()
+                    
+                    for p in local_products:
+                        score = 0
+                        p_concerns = [c.lower() for c in p.get('concerns', [])]
+                        for c in u_concerns:
+                            if c in p_concerns:
+                                score += 2
+                                
+                        p_skin = p.get('skin_type', '').lower()
+                        if p_skin == u_skin or 'all' in p_skin:
+                            score += 1
+                        scored_products.append((score, p))
+                        
+                    scored_products.sort(key=lambda x: x[0], reverse=True)
+                    top_fallback = [p for score, p in scored_products[:3]]
+                    
+                    for p in top_fallback:
                         retrieved += f"Name: {p.get('name', 'Unknown')}\n"
                         retrieved += f"URL: {p.get('url', '')}\n"
                         retrieved += f"Concerns: {p.get('concerns', [])}\n"
