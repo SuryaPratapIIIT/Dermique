@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: clara-lite-backend
+    name: demique-backend
     env: python
     plan: free
     rootDir: .
@@ -13,7 +13,6 @@ services:
         sync: false
       - key: PINECONE_API_KEY
         sync: false
-
       - key: LANGFUSE_PUBLIC_KEY
         sync: false
       - key: LANGFUSE_SECRET_KEY
@@ -25,7 +24,7 @@ services:
 
 
   - type: web
-    name: clara-lite-frontend
+    name: demique-frontend
     env: node
     plan: free
     rootDir: frontend
@@ -37,5 +36,5 @@ services:
       - key: NEXT_PUBLIC_API_URL
         fromService:
           type: web
-          name: clara-lite-backend
+          name: demique-backend
           envVarKey: RENDER_EXTERNAL_URL
