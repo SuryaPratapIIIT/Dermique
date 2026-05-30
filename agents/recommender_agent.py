@@ -166,23 +166,31 @@ CRITICAL: You MUST include the real URL for every product using exactly this for
         # Step 1 — build search query from profile:
         query = f"skincare for {skin_profile.get('skin_type', 'all')} skin targeting {', '.join(skin_profile.get('concerns', []))}"
         
-        # Step 2 — embed the query using HuggingFace free API to save memory:
+        # Step 2 — embed the query using HuggingFace free API:
         api_url = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
         headers = {"Authorization": f"Bearer {os.getenv('HF_TOKEN')}"} if os.getenv("HF_TOKEN") else {}
-        try:
-            print("Sending request to HF API...")
-            response = requests.post(api_url, headers=headers, json={"inputs": [query]}, timeout=30)
-            if response.status_code == 200:
-                print("HF API Success!")
-                result = response.json()
-                query_vector = result[0] if isinstance(result[0], list) else result
-            else:
-                print(f"HF API Failed with status {response.status_code}: {response.text}")
-                # Mock vector if API fails (384 dimensions for MiniLM)
-                query_vector = [0.0] * 384
-        except Exception as e:
-            print(f"HF API Exception: {e}")
-            query_vector = [0.0] * 384
+        
+        query_vector = [0.0] * 384
+        for attempt in range(5):  # Try up to 5 times (wait for cold start)
+            try:
+                print(f"HF API Attempt {attempt + 1}...")
+                response = requests.post(api_url, headers=headers, json={"inputs": [query]}, timeout=30)
+                if response.status_code == 200:
+                    print("HF API Success!")
+                    result = response.json()
+                    query_vector = result[0] if isinstance(result[0], list) else result
+                    break
+                elif response.status_code == 503:
+                    # Model is loading
+                    estimated_time = response.json().get("estimated_time", 10)
+                    print(f"Model is loading, waiting {estimated_time} seconds...")
+                    time.sleep(estimated_time)
+                else:
+                    print(f"HF API Failed with status {response.status_code}: {response.text}")
+                    break
+            except Exception as e:
+                print(f"HF API Exception: {e}")
+                break
         
         # Step 3 — query Pinecone:
         results = self.index.query(
