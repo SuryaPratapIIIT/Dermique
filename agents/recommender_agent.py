@@ -28,7 +28,7 @@ IMPORTANT: The URL field MUST be the real URL from the provided catalog. NEVER m
 ### PRODUCT: [number]
 - Name: [exact product name from the catalog]
 - Category: Skincare
-- Rating: 4.8
+- Rating: [exact rating from the catalog]
 - Reason: [2-3 sentences explaining why this product matches their exact skin type + specific concerns]
 - Note: [sensitivity warning if applicable, otherwise write "None"]
 
@@ -112,6 +112,7 @@ CRITICAL: You MUST ONLY recommend products that are in the provided catalog belo
         for match in results.matches:
             m = match.metadata
             retrieved += f"Name: {m.get('name', 'Unknown')}\n"
+            retrieved += f"Rating: {m.get('rating', '4.5')}\n"
             retrieved += f"URL: {m.get('url', '')}\n"
             retrieved += f"Concerns: {m.get('concerns', [])}\n"
             retrieved += f"Description: {m.get('description', '')}\n\n"
@@ -155,13 +156,14 @@ CRITICAL: You MUST ONLY recommend products that are in the provided catalog belo
                     
                     for p in top_fallback:
                         retrieved += f"Name: {p.get('name', 'Unknown')}\n"
+                        retrieved += f"Rating: {p.get('rating', '4.5')}\n"
                         retrieved += f"URL: {p.get('url', '')}\n"
                         retrieved += f"Concerns: {p.get('concerns', [])}\n"
                         retrieved += f"Description: {p.get('description', '')}\n\n"
                         product_list.append({
                             "name": p.get("name", "Unknown"),
                             "category": "Skincare",
-                            "rating": "4.8",
+                            "rating": str(p.get("rating", "4.5")),
                             "product_url": p.get("url", "")
                         })
             except Exception as e:

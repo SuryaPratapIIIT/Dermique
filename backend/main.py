@@ -61,5 +61,4 @@ async def chat(request: ChatRequest):
 async def health():
     return {"status": "ok", "message": "Dermiq API is running"}
 
-# Trigger reload
-# Trigger reload 3
+# Trigger reload 4

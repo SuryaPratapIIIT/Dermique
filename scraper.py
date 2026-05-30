@@ -12,9 +12,9 @@ urls = [
   "https://www.clinikally.com/products/clinikally-retinol-serum",
   "https://www.clinikally.com/products/clinikally-vitamin-c-serum",
   "https://www.clinikally.com/products/clinikally-azelaic-acid-cream",
-  "https://www.clinikally.com/products/clinikally-salicylic-acid-face-wash",
+  "https://www.clinikally.com/products/clinikally-foaming-face-wash",
   "https://www.clinikally.com/products/clinikally-kojic-acid-cream",
-  "https://www.clinikally.com/products/clinikally-hyaluronic-acid-serum"
+  "https://www.clinikally.com/products/clinikally-hyaluronic-skinbooster-serum"
 ]
 
 def scrape_product(url):
@@ -50,6 +50,21 @@ def scrape_product(url):
         first_p = soup.find("p")
         if first_p:
             description = first_p.get_text(strip=True)
+            
+    # 2.5 rating: look in JSON-LD
+    rating = "4.5" # default
+    json_ld_tags = soup.find_all('script', type='application/ld+json')
+    for tag in json_ld_tags:
+        try:
+            data = json.loads(tag.string)
+            if isinstance(data, dict) and 'aggregateRating' in data:
+                rating = str(data['aggregateRating']['ratingValue'])
+            if isinstance(data, dict) and '@graph' in data:
+                for item in data['@graph']:
+                    if 'aggregateRating' in item:
+                        rating = str(item['aggregateRating']['ratingValue'])
+        except:
+            pass
             
     # 3. ingredients: look for any element containing text "ingredient", split by comma
     ingredients = []
@@ -162,6 +177,7 @@ def scrape_product(url):
         "ingredients": list(set(ingredients)) if isinstance(ingredients, list) else [],
         "skin_type": skin_type,
         "concerns": list(set(concerns)) if isinstance(concerns, list) else [],
+        "rating": rating,
         "url": url
     }
 

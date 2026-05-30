@@ -68,6 +68,7 @@ def main():
             "metadata": {
                 "name": p["name"],
                 "url": p["url"],
+                "rating": p.get("rating", "4.5"),
                 "concerns": p["concerns"],
                 "skin_type": p["skin_type"],
                 "description": p["description"]
