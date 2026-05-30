@@ -3,6 +3,8 @@ export interface Message {
   role: "user" | "assistant"
   content: string
   products?: { name: string; category: string; rating: string; product_url: string; reason?: string; note?: string }[]
+  image?: string
+  transcribed?: boolean
 }
 
 export interface SkinProfile {

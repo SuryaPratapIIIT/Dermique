@@ -2,8 +2,9 @@
 import { Message } from "@/types"
 import ReactMarkdown from "react-markdown"
 import ProductCard from "./ProductCard"
+import { useState, useRef } from "react"
 
-export default function MessageBubble({ message }: { message: Message }) {
+export default function MessageBubble({ message, isMobile }: { message: Message, isMobile?: boolean }) {
   const isUser = message.role === "user"
 
   if (isUser) {
@@ -13,13 +14,31 @@ export default function MessageBubble({ message }: { message: Message }) {
         alignItems: "flex-end", gap: "10px", marginBottom: "20px",
       }}>
         <div style={{
-          background: "linear-gradient(135deg, #ec4899, #f472b6)",
-          color: "#fff", padding: "14px 20px",
-          borderRadius: "20px 20px 6px 20px",
-          maxWidth: "65%", fontSize: "15px", lineHeight: "1.5", fontWeight: 500,
-          boxShadow: "0 4px 20px rgba(236,72,153,0.35)",
+          display: "flex", flexDirection: "column", alignItems: "flex-end",
+          maxWidth: isMobile ? "85%" : "65%"
         }}>
-          {message.content}
+          <div style={{
+            background: "linear-gradient(135deg, #ec4899, #f472b6)",
+            color: "#fff", padding: "14px 20px",
+            borderRadius: "20px 20px 6px 20px",
+            fontSize: "15px", lineHeight: "1.5", fontWeight: 500,
+            boxShadow: "0 4px 20px rgba(236,72,153,0.35)",
+            width: "100%",
+          }}>
+            {message.image && (
+              <img 
+                src={message.image} 
+                alt="Uploaded skin photo"
+                style={{ borderRadius: 12, width: 200, marginBottom: message.content ? 8 : 0 }} 
+              />
+            )}
+            {message.content}
+          </div>
+          {message.transcribed && (
+            <span style={{ fontSize: "11px", color: "#888", fontStyle: "italic", marginTop: "4px", marginRight: "6px" }}>
+              Voice message transcribed
+            </span>
+          )}
         </div>
         <div style={{
           width: "36px", height: "36px", borderRadius: "50%", flexShrink: 0,
@@ -34,6 +53,45 @@ export default function MessageBubble({ message }: { message: Message }) {
   }
 
   // ── Assistant ──
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const playTTS = async () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause()
+        setIsPlaying(false)
+      } else {
+        audioRef.current.play()
+        setIsPlaying(true)
+      }
+      return
+    }
+
+    setIsPlaying(true)
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+      
+      // Clean markdown characters from text before speech for clean audio
+      const cleanText = message.content
+        .replace(/[*#_`~\[\]()\-+>]/g, "")
+        .trim()
+        
+      const res = await fetch(`${API_URL}/speak?text=${encodeURIComponent(cleanText)}`, {
+        method: "POST"
+      })
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const audio = new Audio(url)
+      audioRef.current = audio
+      audio.onended = () => setIsPlaying(false)
+      audio.play()
+    } catch (err) {
+      console.error("TTS playback error:", err)
+      setIsPlaying(false)
+    }
+  }
+
   return (
     <div style={{ marginBottom: "20px" }}>
       <div style={{ display: "flex", alignItems: "flex-end", gap: "10px" }}>
@@ -54,10 +112,11 @@ export default function MessageBubble({ message }: { message: Message }) {
         {/* Bubble */}
         <div style={{
           background: "rgba(255,255,255,0.82)", color: "#1a1a1a",
-          padding: "16px 22px", borderRadius: "20px 20px 20px 6px",
+          padding: "16px 36px 16px 22px", borderRadius: "20px 20px 20px 6px",
           maxWidth: "78%", fontSize: "15px", lineHeight: "1.65",
           boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
           backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.9)",
+          position: "relative",
         }}>
           <ReactMarkdown
             components={{
@@ -68,6 +127,32 @@ export default function MessageBubble({ message }: { message: Message }) {
           >
             {message.content}
           </ReactMarkdown>
+
+          {/* TTS Speaker icon */}
+          <button 
+            onClick={playTTS} 
+            title={isPlaying ? "Pause voice readout" : "Listen aloud"}
+            style={{
+              position: "absolute",
+              right: "10px",
+              bottom: "8px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px",
+              fontSize: "14px",
+              opacity: 0.45,
+              transition: "opacity 0.2s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1,
+            }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "0.45"}
+          >
+            {isPlaying ? "⏸" : "🔊"}
+          </button>
         </div>
       </div>
 

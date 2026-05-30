@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react"
 import { Message } from "@/types"
 import MessageBubble from "./MessageBubble"
 
-export default function ChatWindow({ messages, isLoading }: { messages: Message[], isLoading: boolean }) {
+export default function ChatWindow({ messages, isLoading, loadingMessage, isMobile }: { messages: Message[], isLoading: boolean, loadingMessage?: string, isMobile?: boolean }) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -18,9 +18,9 @@ export default function ChatWindow({ messages, isLoading }: { messages: Message[
         alignItems: "center", justifyContent: "center",
         padding: "60px 40px", gap: "28px",
       }}>
-        {/* Glass orb — bigger for desktop */}
+        {/* Glass orb — bigger for desktop, scaled for mobile */}
         <div style={{
-          width: "220px", height: "220px", borderRadius: "50%",
+          width: isMobile ? "140px" : "220px", height: isMobile ? "140px" : "220px", borderRadius: "50%",
           background: "radial-gradient(circle at 30% 28%, rgba(255,255,255,0.98) 0%, rgba(255,182,255,0.65) 35%, rgba(135,206,250,0.55) 65%, rgba(236,72,153,0.75) 100%)",
           boxShadow: "inset 10px 10px 30px rgba(255,255,255,0.9), inset -15px -15px 40px rgba(0,0,0,0.04), 0 24px 70px rgba(236,72,153,0.22), 0 8px 40px rgba(100,100,255,0.08)",
           border: "1.5px solid rgba(255,255,255,0.75)",
@@ -37,7 +37,7 @@ export default function ChatWindow({ messages, isLoading }: { messages: Message[
         </div>
 
         <div style={{ textAlign: "center", maxWidth: "560px" }}>
-          <h2 style={{ fontSize: "28px", fontWeight: 700, color: "#1a1a1a", letterSpacing: "-0.5px", marginBottom: "12px" }}>
+          <h2 style={{ fontSize: isMobile ? "20px" : "28px", fontWeight: 700, color: "#1a1a1a", letterSpacing: "-0.5px", marginBottom: "12px" }}>
             How can I help your skin today?
           </h2>
           <p style={{ fontSize: "15px", color: "#888", lineHeight: "1.6" }}>
@@ -55,17 +55,16 @@ export default function ChatWindow({ messages, isLoading }: { messages: Message[
     )
   }
 
-  // ── CHAT STATE ──
   return (
     <div style={{
       display: "flex", flexDirection: "column",
       gap: "4px",
-      padding: "32px 36px",
+      padding: isMobile ? "16px 16px" : "32px 36px",
       maxWidth: "900px",
       margin: "0 auto",
       width: "100%",
     }}>
-      {messages.map(msg => <MessageBubble key={msg.id} message={msg} />)}
+      {messages.map(msg => <MessageBubble key={msg.id} message={msg} isMobile={isMobile} />)}
 
       {/* Loading indicator */}
       {isLoading && (
@@ -91,14 +90,19 @@ export default function ChatWindow({ messages, isLoading }: { messages: Message[
             backdropFilter: "blur(12px)",
             border: "1px solid rgba(255,255,255,0.9)",
           }}>
-            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{
-                  width: "8px", height: "8px", borderRadius: "50%",
-                  background: "#ec4899",
-                  animation: `dot 1.2s ease-in-out ${i * 0.2}s infinite`
-                }} />
-              ))}
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              {loadingMessage && (
+                <span style={{ fontSize: "14px", color: "#555", fontWeight: 500 }}>{loadingMessage}</span>
+              )}
+              <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{
+                    width: "8px", height: "8px", borderRadius: "50%",
+                    background: "#ec4899",
+                    animation: `dot 1.2s ease-in-out ${i * 0.2}s infinite`
+                  }} />
+                ))}
+              </div>
             </div>
           </div>
         </div>

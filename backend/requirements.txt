@@ -5,3 +5,4 @@ pinecone
 python-dotenv
 pydantic
 langfuse
+python-multipart
