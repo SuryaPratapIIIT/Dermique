@@ -83,6 +83,14 @@ export default function Home() {
     setProfile(session.profile)
   }
 
+  const deleteSession = (sessionId: string) => {
+    setSavedSessions(prev => {
+      const updated = prev.filter(s => s.id !== sessionId)
+      localStorage.setItem("dermique_sessions", JSON.stringify(updated))
+      return updated
+    })
+  }
+
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", position: "relative", zIndex: 1 }}>
 
@@ -144,26 +152,52 @@ export default function Home() {
               Recent Consultations
             </div>
             {savedSessions.map(session => (
-              <button
+              <div
                 key={session.id}
-                onClick={() => loadSession(session)}
+                className="session-item"
                 style={{
-                  width: "100%", padding: "10px 12px",
+                  display: "flex", alignItems: "center", gap: "4px",
+                  borderRadius: "10px",
                   background: session.id === sessionId ? "rgba(236,72,153,0.08)" : "transparent",
                   border: session.id === sessionId ? "1px solid rgba(236,72,153,0.15)" : "1px solid transparent",
-                  borderRadius: "10px",
-                  color: session.id === sessionId ? "#ec4899" : "#555",
-                  fontWeight: session.id === sessionId ? 600 : 500,
-                  fontSize: "13px",
-                  cursor: "pointer", textAlign: "left",
                   transition: "all 0.15s",
-                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  position: "relative",
                 }}
                 onMouseEnter={e => { if (session.id !== sessionId) { e.currentTarget.style.background = "rgba(0,0,0,0.03)" } }}
                 onMouseLeave={e => { if (session.id !== sessionId) { e.currentTarget.style.background = "transparent" } }}
               >
-                {session.title}
-              </button>
+                <button
+                  onClick={() => loadSession(session)}
+                  style={{
+                    flex: 1, padding: "10px 8px 10px 12px",
+                    background: "transparent", border: "none",
+                    color: session.id === sessionId ? "#ec4899" : "#555",
+                    fontWeight: session.id === sessionId ? 600 : 500,
+                    fontSize: "13px",
+                    cursor: "pointer", textAlign: "left",
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}
+                >
+                  {session.title}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteSession(session.id) }}
+                  title="Delete session"
+                  style={{
+                    flexShrink: 0,
+                    background: "transparent", border: "none",
+                    color: "#ccc", fontSize: "15px",
+                    cursor: "pointer", padding: "6px 8px",
+                    borderRadius: "6px",
+                    lineHeight: 1,
+                    transition: "color 0.15s, background 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = "#ef4444"; e.currentTarget.style.background = "rgba(239,68,68,0.08)" }}
+                  onMouseLeave={e => { e.currentTarget.style.color = "#ccc"; e.currentTarget.style.background = "transparent" }}
+                >
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
         )}
