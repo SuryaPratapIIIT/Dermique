@@ -123,6 +123,31 @@ CRITICAL: You MUST ONLY recommend products that are in the provided catalog belo
             })
         
         if not retrieved.strip():
+            try:
+                import json
+                products_path = os.path.join(os.path.dirname(__file__), "..", "products.json")
+                if not os.path.exists(products_path):
+                    products_path = os.path.join(os.path.dirname(__file__), "..", "..", "products.json")
+                
+                if os.path.exists(products_path):
+                    with open(products_path, "r", encoding="utf-8") as f:
+                        local_products = json.load(f)
+                    
+                    for p in local_products[:3]:
+                        retrieved += f"Name: {p.get('name', 'Unknown')}\n"
+                        retrieved += f"URL: {p.get('url', '')}\n"
+                        retrieved += f"Concerns: {p.get('concerns', [])}\n"
+                        retrieved += f"Description: {p.get('description', '')}\n\n"
+                        product_list.append({
+                            "name": p.get("name", "Unknown"),
+                            "category": "Skincare",
+                            "rating": "4.8",
+                            "product_url": p.get("url", "")
+                        })
+            except Exception as e:
+                print(f"Fallback to products.json failed: {e}")
+                
+        if not retrieved.strip():
             retrieved = "NO PRODUCTS FOUND IN DATABASE. Please tell the user you cannot find any matching products right now."
             
         user_message = f"""User skin profile:
