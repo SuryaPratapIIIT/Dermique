@@ -21,7 +21,7 @@ DermiQue is an intelligent, conversational AI skincare assistant that provides h
 ### Backend & AI
 - **API Framework:** FastAPI (Python)
 - **AI Orchestration:** LangGraph & LangChain
-- **LLM Provider:** Google Gemini / Anthropic Claude / OpenAI (Configurable)
+- **LLM Provider:** Groq
 - **Vector Database:** Pinecone (for semantic product search)
 - **Observability:** Langfuse (for tracing agent conversations)
 
