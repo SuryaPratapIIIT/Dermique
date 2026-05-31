@@ -433,7 +433,7 @@ export default function Home() {
         </div>
 
         {/* Chat messages */}
-        <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", position: "relative" }}>
           <ChatWindow messages={messages} isLoading={isLoading} loadingMessage={loadingMessage} isMobile={isMobile} />
         </div>
 

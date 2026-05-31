@@ -40,6 +40,8 @@ body {
     background: rgba(255, 255, 255, 0.96) !important;
     box-shadow: none !important;
     z-index: 100 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
   
   .sidebar-drawer.open {
