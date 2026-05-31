@@ -138,17 +138,18 @@ export default function ChatInput({ onSend, isLoading, sessionId, onImageUploadS
   const canSend = !!text.trim() && !isLoading && !isUploading
 
   return (
-    <div style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "14px",
-      background: "rgba(255,255,255,0.72)",
-      backdropFilter: "blur(16px)",
-      border: "1.5px solid rgba(255,255,255,0.95)",
-      borderRadius: "32px",
-      padding: "12px 18px",
-      boxShadow: "0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
-    }}>
+    <div 
+      className="chat-input-pill-container"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        background: "rgba(255,255,255,0.72)",
+        backdropFilter: "blur(16px)",
+        border: "1.5px solid rgba(255,255,255,0.95)",
+        borderRadius: "32px",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)",
+      }}
+    >
       {/* Hidden file input */}
       <input 
         type="file" 
@@ -160,24 +161,23 @@ export default function ChatInput({ onSend, isLoading, sessionId, onImageUploadS
       />
 
       {/* Relative container for popover */}
-      <div ref={containerRef} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <div ref={containerRef} className="chat-input-buttons-group">
         <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
           {/* Attach/Plus button */}
           <button 
             title="Attach skin/face photo" 
             disabled={isLoading || isUploading || isRecording}
             onClick={() => setShowMenu(!showMenu)}
+            className="chat-input-circle-btn"
             style={{
               background: "rgba(0,0,0,0.04)", 
               border: "1.5px solid rgba(0,0,0,0.06)",
               borderRadius: "50%",
-              width: "36px", height: "36px",
               cursor: (isLoading || isUploading || isRecording) ? "not-allowed" : "pointer", 
               display: "flex", alignItems: "center", justifyContent: "center",
               opacity: (isLoading || isUploading || isRecording) ? 0.4 : 0.8, 
               flexShrink: 0,
               transition: "all 0.2s ease",
-              fontSize: "20px",
               fontWeight: "bold",
               color: "#333",
               lineHeight: 1,
@@ -236,41 +236,41 @@ export default function ChatInput({ onSend, isLoading, sessionId, onImageUploadS
           )}
         </div>
 
-        {/* Microphone recording button */}
-        <button
-          onClick={toggleRecording}
-          title={isRecording ? "Click to stop recording" : "Click to record voice message"}
-          disabled={isLoading || isUploading}
-          style={{
-            width: "36px",
-            height: "36px",
-            borderRadius: "50%",
-            background: isRecording 
-              ? "#D85A30"           
-              : "rgba(0,0,0,0.04)", 
-            border: isRecording 
-              ? "2px solid #FF8C6B" 
-              : "1.5px solid rgba(0,0,0,0.06)",
-            color: isRecording ? "#FFFFFF" : "#333",
-            fontSize: "16px",
-            cursor: (isLoading || isUploading) ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            transition: "all 0.2s ease",
-            animation: isRecording 
-              ? "pulse 1.2s ease-in-out infinite" 
-              : "none",
-            lineHeight: 1,
-            userSelect: "none",
-            opacity: (isLoading || isUploading) ? 0.4 : 0.8,
-          }}
-          onMouseEnter={e => { if (!isRecording && !isLoading && !isUploading) e.currentTarget.style.background = "rgba(0,0,0,0.08)" }}
-          onMouseLeave={e => { if (!isRecording && !isLoading && !isUploading) e.currentTarget.style.background = "rgba(0,0,0,0.04)" }}
-        >
-          {isRecording ? "⏹" : "🎤"}
-        </button>
+        {/* Microphone recording button - Hidden when user is typing */}
+        {!text.trim() && (
+          <button
+            onClick={toggleRecording}
+            title={isRecording ? "Click to stop recording" : "Click to record voice message"}
+            disabled={isLoading || isUploading}
+            className="chat-input-circle-btn"
+            style={{
+              borderRadius: "50%",
+              background: isRecording 
+                ? "#D85A30"           
+                : "rgba(0,0,0,0.04)", 
+              border: isRecording 
+                ? "2px solid #FF8C6B" 
+                : "1.5px solid rgba(0,0,0,0.06)",
+              color: isRecording ? "#FFFFFF" : "#333",
+              cursor: (isLoading || isUploading) ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              transition: "all 0.2s ease",
+              animation: isRecording 
+                ? "pulse 1.2s ease-in-out infinite" 
+                : "none",
+              lineHeight: 1,
+              userSelect: "none",
+              opacity: (isLoading || isUploading) ? 0.4 : 0.8,
+            }}
+            onMouseEnter={e => { if (!isRecording && !isLoading && !isUploading) e.currentTarget.style.background = "rgba(0,0,0,0.08)" }}
+            onMouseLeave={e => { if (!isRecording && !isLoading && !isUploading) e.currentTarget.style.background = "rgba(0,0,0,0.04)" }}
+          >
+            {isRecording ? "⏹" : "🎤"}
+          </button>
+        )}
       </div>
 
       <style>{`
@@ -290,7 +290,7 @@ export default function ChatInput({ onSend, isLoading, sessionId, onImageUploadS
         value={text}
         onChange={e => setText(e.target.value)}
         onKeyDown={e => { if (e.key === "Enter") handleSend() }}
-        placeholder={isUploading ? "🔍 Analyzing your skin..." : "Ask me something about your skin..."}
+        placeholder={isUploading ? "🔍 Analyzing skin..." : "Ask about your skin..."}
         disabled={isLoading || isUploading}
         style={{
           flex: 1,
@@ -300,6 +300,7 @@ export default function ChatInput({ onSend, isLoading, sessionId, onImageUploadS
           fontSize: "15px",
           color: "#1a1a1a",
           fontWeight: 400,
+          minWidth: "60px",
         }}
       />
 
@@ -307,8 +308,8 @@ export default function ChatInput({ onSend, isLoading, sessionId, onImageUploadS
       <button
         onClick={handleSend}
         disabled={!canSend}
+        className="chat-input-send-btn"
         style={{
-          width: "42px", height: "42px",
           background: canSend
             ? "linear-gradient(135deg, #ec4899, #f472b6)"
             : "rgba(0,0,0,0.07)",

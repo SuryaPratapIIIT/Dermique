@@ -191,14 +191,15 @@ export default function Home() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", position: "relative", zIndex: 1 }}>
+    <div style={{ display: "flex", height: "100dvh", minHeight: "100vh", overflow: "hidden", position: "relative", zIndex: 1 }}>
       
       {/* ══════════════════════════════════════════
           MOBILE SIDEBAR BACKDROP
       ══════════════════════════════════════════ */}
-      {isMobile && sidebarOpen && (
+      {sidebarOpen && (
         <div 
           onClick={() => setSidebarOpen(false)}
+          className="show-on-mobile"
           style={{
             position: "absolute",
             inset: 0,
@@ -213,22 +214,23 @@ export default function Home() {
       {/* ══════════════════════════════════════════
           LEFT SIDEBAR (Drawer on Mobile)
       ══════════════════════════════════════════ */}
-      <aside style={{
-        position: isMobile ? "absolute" : "relative",
-        top: 0, left: 0, bottom: 0,
-        width: "280px", flexShrink: 0,
-        display: "flex", flexDirection: "column",
-        background: isMobile ? "rgba(255,255,255,0.94)" : "rgba(255,255,255,0.35)",
-        backdropFilter: "blur(24px)",
-        borderRight: "1px solid rgba(255,255,255,0.6)",
-        padding: "28px 20px",
-        gap: "8px",
-        zIndex: 100,
-        transform: isMobile ? (sidebarOpen ? "translateX(0)" : "translateX(-280px)") : "none",
-        transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-        boxShadow: isMobile && sidebarOpen ? "5px 0 30px rgba(0,0,0,0.15)" : "none",
-        height: "100%",
-      }}>
+      <aside 
+        className={`sidebar-drawer ${sidebarOpen ? "open" : ""}`}
+        style={{
+          position: "relative",
+          top: 0, left: 0, bottom: 0,
+          width: "280px", flexShrink: 0,
+          display: "flex", flexDirection: "column",
+          background: "rgba(255,255,255,0.35)",
+          backdropFilter: "blur(24px)",
+          borderRight: "1px solid rgba(255,255,255,0.6)",
+          padding: "28px 20px",
+          gap: "8px",
+          zIndex: 100,
+          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          height: "100%",
+        }}
+      >
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
           <div style={{
@@ -369,55 +371,63 @@ export default function Home() {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
         {/* Top bar */}
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: isMobile ? "14px 18px" : "20px 36px",
-          borderBottom: "1px solid rgba(255,255,255,0.5)",
-          background: "rgba(255,255,255,0.25)",
-          backdropFilter: "blur(16px)",
-          flexShrink: 0,
-        }}>
+        <div 
+          className="responsive-header"
+          style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            borderBottom: "1px solid rgba(255,255,255,0.5)",
+            background: "rgba(255,255,255,0.25)",
+            backdropFilter: "blur(16px)",
+            flexShrink: 0,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {isMobile && (
-              <button 
-                onClick={() => setSidebarOpen(true)}
-                style={{
-                  background: "rgba(255,255,255,0.85)",
-                  border: "1.5px solid rgba(0,0,0,0.06)",
-                  borderRadius: "10px",
-                  padding: "8px 12px",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: "#333",
-                  cursor: "pointer",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                ☰ Menu
-              </button>
-            )}
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="show-on-mobile"
+              style={{
+                background: "rgba(255,255,255,0.85)",
+                border: "1.5px solid rgba(0,0,0,0.06)",
+                borderRadius: "10px",
+                padding: "8px 12px",
+                fontSize: "13px",
+                fontWeight: 700,
+                color: "#333",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: "4px",
+              }}
+            >
+              ☰ Menu
+            </button>
             <div>
-              <h1 style={{ fontSize: isMobile ? "16px" : "18px", fontWeight: 700, color: "#1a1a1a", letterSpacing: "-0.3px" }}>
+              <h1 className="responsive-title" style={{ fontWeight: 700, color: "#1a1a1a", letterSpacing: "-0.3px" }}>
                 Skin Assessment
               </h1>
-              {!isMobile && (
-                <p style={{ fontSize: "13px", color: "#888", marginTop: "1px" }}>Tell me about your skin — I'll find the right products</p>
-              )}
+              <p className="hide-on-mobile" style={{ fontSize: "13px", color: "#888", marginTop: "1px" }}>
+                Tell me about your skin — I'll find the right products
+              </p>
             </div>
           </div>
-          <div style={{
-            display: "flex", alignItems: "center", gap: "8px",
-            background: "rgba(255,255,255,0.7)",
-            border: "1px solid rgba(255,255,255,0.9)",
-            borderRadius: "30px", padding: isMobile ? "5px 12px" : "7px 16px",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
-          }}>
+          <div 
+            className="responsive-online-badge"
+            style={{
+              display: "flex", alignItems: "center", gap: "8px",
+              background: "rgba(255,255,255,0.7)",
+              border: "1px solid rgba(255,255,255,0.9)",
+              borderRadius: "30px",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+            }}
+          >
             <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 6px rgba(74,222,128,0.6)" }} />
-            <span style={{ fontSize: isMobile ? "11px" : "13px", fontWeight: 600, color: "#555" }}>
-              {isMobile ? "Online" : "System Online"}
+            <span className="hide-on-mobile" style={{ fontSize: "13px", fontWeight: 600, color: "#555" }}>
+              System Online
+            </span>
+            <span className="show-on-mobile" style={{ fontSize: "11px", fontWeight: 600, color: "#555" }}>
+              Online
             </span>
           </div>
         </div>
@@ -428,13 +438,15 @@ export default function Home() {
         </div>
 
         {/* Input bar */}
-        <div style={{
-          padding: isMobile ? "12px 16px 16px" : "20px 36px 28px",
-          borderTop: "1px solid rgba(255,255,255,0.5)",
-          background: "rgba(255,255,255,0.2)",
-          backdropFilter: "blur(16px)",
-          flexShrink: 0,
-        }}>
+        <div 
+          className="responsive-input-bar"
+          style={{
+            borderTop: "1px solid rgba(255,255,255,0.5)",
+            background: "rgba(255,255,255,0.2)",
+            backdropFilter: "blur(16px)",
+            flexShrink: 0,
+          }}
+        >
           <div style={{ maxWidth: "900px", margin: "0 auto" }}>
             <ChatInput 
               onSend={sendMessage} 

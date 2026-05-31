@@ -13,21 +13,26 @@ export default function ChatWindow({ messages, isLoading, loadingMessage, isMobi
   // ── EMPTY STATE ──
   if (messages.length === 0) {
     return (
-      <div style={{
-        flex: 1, display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: "60px 40px", gap: "28px",
-      }}>
+      <div 
+        className="empty-state-container"
+        style={{
+          flex: 1, display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+        }}
+      >
         {/* Glass orb — bigger for desktop, scaled for mobile */}
-        <div style={{
-          width: isMobile ? "140px" : "220px", height: isMobile ? "140px" : "220px", borderRadius: "50%",
-          background: "radial-gradient(circle at 30% 28%, rgba(255,255,255,0.98) 0%, rgba(255,182,255,0.65) 35%, rgba(135,206,250,0.55) 65%, rgba(236,72,153,0.75) 100%)",
-          boxShadow: "inset 10px 10px 30px rgba(255,255,255,0.9), inset -15px -15px 40px rgba(0,0,0,0.04), 0 24px 70px rgba(236,72,153,0.22), 0 8px 40px rgba(100,100,255,0.08)",
-          border: "1.5px solid rgba(255,255,255,0.75)",
-          position: "relative",
-          animation: "floatOrb 5s ease-in-out infinite",
-          marginBottom: "8px",
-        }}>
+        <div 
+          className="glass-orb"
+          style={{
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 30% 28%, rgba(255,255,255,0.98) 0%, rgba(255,182,255,0.65) 35%, rgba(135,206,250,0.55) 65%, rgba(236,72,153,0.75) 100%)",
+            boxShadow: "inset 10px 10px 30px rgba(255,255,255,0.9), inset -15px -15px 40px rgba(0,0,0,0.04), 0 24px 70px rgba(236,72,153,0.22), 0 8px 40px rgba(100,100,255,0.08)",
+            border: "1.5px solid rgba(255,255,255,0.75)",
+            position: "relative",
+            animation: "floatOrb 5s ease-in-out infinite",
+            marginBottom: "8px",
+          }}
+        >
           <div style={{
             position: "absolute", top: "14%", left: "18%",
             width: "30%", height: "18%",
@@ -36,11 +41,11 @@ export default function ChatWindow({ messages, isLoading, loadingMessage, isMobi
           }} />
         </div>
 
-        <div style={{ textAlign: "center", maxWidth: "560px" }}>
-          <h2 style={{ fontSize: isMobile ? "20px" : "28px", fontWeight: 700, color: "#1a1a1a", letterSpacing: "-0.5px", marginBottom: "12px" }}>
+        <div style={{ textAlign: "center", maxWidth: "560px", padding: "0 12px" }}>
+          <h2 className="empty-state-title" style={{ fontWeight: 700, color: "#1a1a1a", letterSpacing: "-0.5px" }}>
             How can I help your skin today?
           </h2>
-          <p style={{ fontSize: "15px", color: "#888", lineHeight: "1.6" }}>
+          <p className="empty-state-desc" style={{ color: "#888" }}>
             Describe your skin type and concerns — Dermique's AI will analyze your profile and recommend the perfect routine.
           </p>
         </div>
@@ -56,14 +61,16 @@ export default function ChatWindow({ messages, isLoading, loadingMessage, isMobi
   }
 
   return (
-    <div style={{
-      display: "flex", flexDirection: "column",
-      gap: "4px",
-      padding: isMobile ? "16px 16px" : "32px 36px",
-      maxWidth: "900px",
-      margin: "0 auto",
-      width: "100%",
-    }}>
+    <div 
+      className="chat-window-container"
+      style={{
+        display: "flex", flexDirection: "column",
+        gap: "4px",
+        maxWidth: "900px",
+        margin: "0 auto",
+        width: "100%",
+      }}
+    >
       {messages.map(msg => <MessageBubble key={msg.id} message={msg} isMobile={isMobile} />)}
 
       {/* Loading indicator */}
