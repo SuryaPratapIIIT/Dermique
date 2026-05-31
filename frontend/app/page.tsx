@@ -191,7 +191,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100dvh", minHeight: "100vh", overflow: "hidden", position: "relative", zIndex: 1 }}>
+    <div style={{ display: "flex", height: "100dvh", overflow: "hidden", position: "relative", zIndex: 1 }}>
       
       {/* ══════════════════════════════════════════
           MOBILE SIDEBAR BACKDROP
