@@ -1,4 +1,4 @@
-# DermiQue 🌿✨
+# DermiQue 🌿
 
 DermiQue is an intelligent, conversational AI skincare assistant that provides highly personalized product recommendations based on a user's unique skin profile, concerns, and goals.
 
